@@ -2,6 +2,7 @@ package url
 
 import (
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -20,6 +21,12 @@ func (u *UrlController) UploadUrl(c *gin.Context) {
 	err := c.BindJSON(&uploadUrlDTO)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Key missing or value invalid"})
+		return
+	}
+
+	url, err := url.ParseRequestURI(uploadUrlDTO.Url)
+	if err != nil || url.Scheme == "" || (url.Scheme != "" && !(url.Scheme == "http" || url.Scheme == "https")) || url.Host == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Not a valid URL"})
 		return
 	}
 
