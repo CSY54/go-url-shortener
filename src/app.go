@@ -8,14 +8,24 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func setupDatabase(db *gorm.DB) {
-	db.AutoMigrate(&url.Url{})
-}
+func setupDatabase(shouldTeardown bool) *gorm.DB {
+	db, err := gorm.Open(sqlite.Open("sqlite.db"), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 
-func teardownDatabase(db *gorm.DB) {
-	if err := db.Migrator().DropTable(&url.Url{}); err != nil {
+	if err != nil {
 		panic(err)
 	}
+
+	if shouldTeardown {
+		if err := db.Migrator().DropTable(&url.Url{}); err != nil {
+			panic(err)
+		}
+	}
+
+	db.AutoMigrate(&url.Url{})
+
+	return db
 }
 
 func setupRoute(r *gin.Engine, db *gorm.DB) {
@@ -32,16 +42,8 @@ func setupRoute(r *gin.Engine, db *gorm.DB) {
 	r.GET("/:urlId", urlController.RedirectUrl)
 }
 
-func Init() *gin.Engine {
-	db, err := gorm.Open(sqlite.Open("sqlite.db"), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
-	})
-
-	if err != nil {
-		panic(err)
-	}
-
-	setupDatabase(db)
+func Init(shouldTeardown bool) *gin.Engine {
+	db := setupDatabase(shouldTeardown)
 
 	r := gin.Default()
 
