@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/CSY54/go-url-shortener/src/url"
 	"github.com/gin-gonic/gin"
+	_ "github.com/joho/godotenv"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -52,8 +53,8 @@ func Init(shouldTeardown bool) *gin.Engine {
 	return r
 }
 
-func Run(r *gin.Engine) {
-	err := r.Run("0.0.0.0:8080")
+func Run(r *gin.Engine, addr string) {
+	err := r.Run(addr)
 	if err != nil {
 		panic(err)
 	}

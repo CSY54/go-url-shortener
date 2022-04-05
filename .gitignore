@@ -1,2 +1,3 @@
 sqlite.db
 gin-bin
+.env
